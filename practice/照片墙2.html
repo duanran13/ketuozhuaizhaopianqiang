@@ -18,9 +18,8 @@
             margin: 10px;
             float: left;
         }
-
         #container img.collide{
-            border: 1px solid #f00;
+            border: 1px solid #ff0000;
         }
     </style>
 </head>
@@ -42,87 +41,81 @@
     var aImg = oContainer.getElementsByTagName("img");
     var zIndex = 1;
     var collide = [];
-    var nearElem = null;
     for(var i = 0;i<aImg.length;i++){
         aImg[i].style.left = aImg[i].offsetLeft+"px";
         aImg[i].style.top = aImg[i].offsetTop+"px";
     }
-    for(var i = 0;i< aImg.length;i++){
-        aImg[i].style.position = "absolute";
+    for(var i = 0;i<aImg.length;i++){
+         aImg[i].style.position = "absolute";
         aImg[i].style.margin = 0;
         drag(aImg[i]);
-        aImg[i].pos={
+        aImg[i].pos = {
             left:aImg[i].offsetLeft,
             top:aImg[i].offsetTop
         }
     }
-
-    function drag (elem){
-        elem.onmousedown = function(e){
-            e = e||window.event;
-            var iDisX = e.clientX-elem.offsetLeft;
-            var iDisY = e.clientY-elem.offsetTop;
-            document.onmousemove = function(e){
-                e = e||window.event;
-                var iLeft = e.clientX-iDisX;
-                var iTop = e.clientY-iDisY;
-                elem.style.zIndex = zIndex++;
-                elem.style.left = iLeft+"px";
-                elem.style.top = iTop+"px";
+    function drag(elem) {
+        elem.onmousedown = function (e) {
+            e = e || window.event;
+            var iDisX = e.clientX - elem.offsetLeft;
+            var iDisY = e.clientY - elem.offsetTop;
+            document.onmousemove = function (e) {
+                var iLeft = e.clientX - iDisX;
+                var iTop = e.clientY - iDisY;
+                elem.style.zIndex = zIndex++;//CSS属性zIndex
+                elem.style.left = iLeft + "px";
+                elem.style.top = iTop + "px";
                 collide = [];
-                for(var i = 0;i<aImg.length;i++){
-                    if(aImg[i] == elem){
-                        continue;//退出本次循环
+                for (var i = 0; i < aImg.length; i++) {
+                    if (aImg[i] == elem) {
+                        continue;
                     }
-                    var isCol = checkCollide(elem,aImg[i]);
-                    if(isCol){
+                    var isCol = checkCollide(elem, aImg[i]);
+                    if (isCol) {
                         collide.push(aImg[i]);
                     }
-                    aImg[i].className = "";//让所有的img的边框都为空，只让特定的加
+                    aImg[i].className = "";
                 }
                 if(collide.length>0){
                     nearElem = nearest(elem);
-                    nearElem.className = "collide";//找他最近的图片给他加个边框
+                    nearElem.className = "collide";
                 }
                 else{
-                    nearElem = null;//length<0没有最近的图片就没有找到
+                    nearElem = null;
                 }
-                return false;
+                return false;//解除默认
             };
-            document.onmouseup = function(){
+            document.onmouseup = function () {
                 document.onmousemove = null;
                 document.onmouseup = null;
                 if(nearElem){
                     animate(elem,nearElem.pos);
                     animate(nearElem,elem.pos);
                     nearElem.className = "";
-                    var pos;
-                    pos = nearElem.pos;
+                    var pos = nearElem.pos;
                     nearElem.pos = elem.pos;
                     elem.pos = pos;
-                    nearElem = null;//防止点击的那个元素和之前点击的元素换位置
-
+                    nearElem = null;
                 }
                 else{
-                    animate(elem,elem.pos);//让拖出去的图片回到原来的位置
+                    animate(elem,elem.pos);
                 }
             };
         };
-
     };
     function checkCollide(elem,target){
         var elemL = elem.offsetLeft,
-                elemR = elem.offsetLeft+elem.offsetWidth,
+                elemR = elem.offsetLeft + elem.offsetWidth,
                 elemT = elem.offsetTop,
-                elemB = elem.offsetTop+elem.offsetHeight;
+                elemB = elem.offsetTop + elem.offsetHeight;
         var targetL = target.offsetLeft,
-                targetR = target.offsetLeft+target.offsetWidth,
+                targetR = target.offsetLeft + target.offsetWidth,
                 targetT = target.offsetTop,
-                targetB = target.offsetTop+target.offsetHeight;
-        if(elemL>targetR||elemR<targetL||elemT>targetB||elemB<targetT){
+                targetB = target.offsetTop + target.offsetHeight;
+        if (elemL > targetR || elemR < targetL || elemT > targetB || elemB < targetT) {
             return false;
         }
-        else{
+        else {
             return true;
         }
     };
@@ -138,7 +131,7 @@
                 index = i;
             }
         }
-        return collide[index];//for 后面return
+        return collide[index];
     };
 </script>
 </body>
