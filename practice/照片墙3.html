@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>照片墙</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #container {
+            margin: 0 auto;
+            width: 615px;
+        }
+
+        #container img {
+            width: 200px;
+            height: 150px;
+            float: left;
+            margin-right: 5px;
+        }
+
+        #container img.collide {
+            border: 1px solid #ff0000;
+        }
+    </style>
+</head>
+<body>
+<div id="container">
+    <img src="../1.jpg"/>
+    <img src="../2.jpg"/>
+    <img src="../3.jpg"/>
+    <img src="../4.jpg"/>
+    <img src="../5.jpg"/>
+    <img src="../6.jpg"/>
+    <img src="../7.jpg"/>
+    <img src="../8.jpg"/>
+    <img src="../9.jpg"/>
+</div>
+<script src="../jslib.js"></script>
+<script>
+    var oContainer = document.getElementById("container");
+    var aImg = oContainer.getElementsByTagName("img");
+    var zIndex = 1;
+    var collide = [];
+    var nearRest = null;
+    for (var i = 0; i < aImg.length; i++) {
+        aImg[i].style.left = aImg[i].offsetLeft + "px";
+        aImg[i].style.top = aImg[i].offsetTop + "px";
+    }
+    for (var i = 0; i < aImg.length; i++) {
+        aImg[i].style.position = "absolute";
+        aImg[i].style.margin = 0;
+        drag(aImg[i]);
+        aImg[i].pos = {
+            left: aImg[i].offsetLeft,
+            top: aImg[i].offsetTop
+        }
+    }
+    function drag(elem) {
+        elem.onmousedown = function (e) {
+            e = e || window.event;
+            var iDisX = e.clientX - elem.offsetLeft;
+            var iDisY = e.clientY - elem.offsetTop;
+            document.onmousemove = function (e) {
+                e = e || window.event;
+                var iLeft = e.clientX - iDisX;
+                var iTop = e.clientY - iDisY;
+                elem.style.zIndex = zIndex++;
+                elem.style.left = iLeft + "px";
+                elem.style.top = iTop + "px";
+//                检测拖拽的每一个图片和除它本身的图片发没发生碰撞
+                collide = [];
+                for (var i = 0; i < aImg.length; i++) {
+                    if (aImg[i] == elem) {
+                        continue;
+                    }
+                    var isColl = checkCollide(elem, aImg[i]);
+                    if (isColl) {
+                        collide.push(aImg[i]);
+                    }
+                    aImg[i].className = "";
+                }
+                if (collide.length > 0) {
+                    nearRest = nearElem(elem);
+                    nearRest.className = "collide";
+                }
+                else {
+                    nearRest = null;
+                }
+                return false;
+            };
+            document.onmouseup = function () {
+                document.onmousemove = null;
+                document.onmouseup = null;
+                //elem nearRest 交换位置
+                if (nearRest) {
+                    animate(elem, nearRest.pos);// 自己定义的
+                    animate(nearRest, elem.pos);
+                    var pos = nearRest.pos;// 让改变的图片坐标和之前的图片坐标互换
+                    nearRest.pos = elem.pos;
+                    elem.pos = pos;
+                    nearRest.className = "";
+                    nearRest = null;//取消点击时和周围的图片互换
+                }
+                else {
+                    animate(elem, elem.pos);
+                }
+            };
+        };
+    }
+    ;
+    function checkCollide(elem, target) {
+        var elemL = elem.offsetLeft,
+                elemR = elem.offsetLeft + elem.offsetWidth,
+                elemT = elem.offsetTop,
+                elemB = elem.offsetTop + elem.offsetHeight;
+        var targetL = target.offsetLeft,
+                targetR = target.offsetLeft + target.offsetWidth,
+                targetT = target.offsetTop,
+                targetB = target.offsetTop + target.offsetHeight;
+        if (elemL > targetR || elemR < targetL || elemT > targetB || elemB < targetT) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    ;
+    //    两个图片接触，选择最靠近的那一个进行移动通过中心点和中心点的距离看那个中心点距离最小就是和谁最近
+    //    即是图片最上角之间的距离
+    function nearElem(elem) {
+        var minDis = 99999;
+        var index = -1;
+        for (var i = 0; i < collide.length; i++) {
+            var x = collide[i].offsetLeft - elem.offsetLeft;
+            var y = collide[i].offsetTop - elem.offsetTop;
+            var dis = Math.sqrt(x * x + y * y);
+            if (dis < minDis) {
+                minDis = dis;
+                index = i;
+            }
+        }
+        return collide[index];// 返回最小距离的图片
+    }
+    ;
+</script>
+</body>
+</html>
